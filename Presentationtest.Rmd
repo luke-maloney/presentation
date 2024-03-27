@@ -1,0 +1,348 @@
+---
+title: "Government Preference in Former Gran Colombia"
+author: "Luke Maloney"
+date: "2024-03-27"
+output: powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+# load packages
+library(tidyverse) 
+library(knitr) 
+library(crayon) 
+library(tinytex) 
+library(ggplot2) 
+library(rmarkdown) 
+library(scales)
+library(lubridate)
+library(dplyr)
+library(haven)
+library(patchwork)
+systemfonts::system_fonts()
+```
+
+``` {r}
+#open data
+lb = read_rds("Latinobarometro_2023_Eng_Rds_v1_0.rds")
+
+#cleaning data
+countries = c("170", "218", "591", "862")
+df = lb[lb$idenpa %in% countries, c("idenpa", "P16ST", "P18ST_A", "P20STM")]
+df$P16ST[df$P16ST == 97] = NA
+df$P18ST_A[df$P18ST_A == -5] = NA
+df$P20STM[df$P20STM == -2] = NA
+df$P20STM[df$P20STM == -1] = NA
+
+##collecting data to be used by country:
+#democracy preferred
+coldem = filter(df, idenpa == 170)
+colad = count(coldem, P18ST_A)
+total = nrow(coldem)
+colad = mutate(colad, percentage = n / total * 100)
+
+
+ecudem = filter(df, idenpa == 218)
+ecuad = count(ecudem, P18ST_A)
+total = nrow(ecudem)
+ecuad = mutate(ecuad, percentage = n / total * 100)
+
+pandem = filter(df, idenpa == 591)
+panad = count(pandem, P18ST_A)
+total = nrow(pandem)
+panad = mutate(panad, percentage = n / total * 100)
+
+vendem = filter(df, idenpa == 862)
+venad = count(vendem, P18ST_A)
+total = nrow(vendem)
+venad = mutate(venad, percentage = n / total * 100)
+
+#combine data
+
+condemcomnames = c(rep("Colombia", nrow(colad)), rep("Ecuador", nrow(ecuad)), rep("Panama", nrow(panad)), 
+                   rep("Venezuela", nrow(venad)))
+
+condemcom = rbind(colad, ecuad, panad, venad)
+condemcom$country = condemcomnames
+condemcom = condemcom |>
+  select(country, everything())
+condemcom = condemcom |>
+  filter(P18ST_A %in% c(1, 2))
+condemcom = condemcom |>
+  group_by(country) |>
+  summarize(total_support = sum(percentage))
+
+
+
+#military acceptable
+
+colmil = filter(df, idenpa == 170)
+colam = count(colmil, P20STM)
+total = nrow(colmil)
+colam = mutate(colam, percentage = n / total * 100)
+
+ecumil = filter(df, idenpa == 218)
+ecuam = count(ecumil, P20STM)
+total = nrow(ecumil)
+ecuam = mutate(ecuam, percentage = n / total * 100)
+
+panmil = filter(df, idenpa == 591)
+panam = count(panmil, P20STM)
+total = nrow(panmil)
+panam = mutate(panam, percentage = n / total * 100)
+
+venmil = filter(df, idenpa == 862)
+venam = count(venmil, P20STM)
+total = nrow(venmil)
+venam = mutate(venam, percentage = n / total * 100)
+
+#combine
+conmilcomnames = c(rep("Colombia", nrow(colam)), rep("Ecuador", nrow(ecuam)), rep("Panama", nrow(panam)), 
+                   rep("Venezuela", nrow(venam)))
+
+conmilcom = rbind(colam, ecuam, panam, venam)
+conmilcom$country = conmilcomnames
+conmilcom = conmilcom |>
+  select(country, everything())
+conmilcom = conmilcom |>
+  filter(P20STM == 1)
+
+##same but political leaning
+
+zdem = filter(df, P16ST == 0)
+zad = count(zdem, P18ST_A)
+total = nrow(zdem)
+zad = mutate(zad, percentage = n / total * 100)
+
+odem = filter(df, P16ST == 1)
+oad = count(odem, P18ST_A)
+total = nrow(odem)
+oad = mutate(oad, percentage = n / total * 100)
+
+tdem = filter(df, P16ST == 2)
+tad = count(tdem, P18ST_A)
+total = nrow(tdem)
+tad = mutate(tad, percentage = n / total * 100)
+
+trdem = filter(df, P16ST == 3)
+trad = count(trdem, P18ST_A)
+total = nrow(trdem)
+trad = mutate(trad, percentage = n / total * 100)
+
+fdem = filter(df, P16ST == 4)
+fad = count(fdem, P18ST_A)
+total = nrow(fdem)
+fad = mutate(fad, percentage = n / total * 100)
+
+fidem = filter(df, P16ST == 5)
+fiad = count(fidem, P18ST_A)
+total = nrow(fidem)
+fiad = mutate(fiad, percentage = n / total * 100)
+
+sdem = filter(df, P16ST == 6)
+sad = count(sdem, P18ST_A)
+total = nrow(sdem)
+sad = mutate(sad, percentage = n / total * 100)
+
+sedem = filter(df, P16ST == 7)
+sead = count(sedem, P18ST_A)
+total = nrow(sedem)
+sead = mutate(sead, percentage = n / total * 100)
+
+edem = filter(df, P16ST == 8)
+ead = count(edem, P18ST_A)
+total = nrow(edem)
+ead = mutate(ead, percentage = n / total * 100)
+
+ndem = filter(df, P16ST == 9)
+nad = count(ndem, P18ST_A)
+total = nrow(ndem)
+nad = mutate(nad, percentage = n / total * 100)
+
+tedem = filter(df, P16ST == 10)
+tead = count(tedem, P18ST_A)
+total = nrow(tedem)
+tead = mutate(tead, percentage = n / total * 100)
+
+#combine data
+
+poldemcomnames = c(rep("0", nrow(zad)), rep("1", nrow(oad)), rep("2", nrow(tad)), 
+                   rep("3", nrow(trad)), rep("4", nrow(fad)), rep("5", nrow(fiad)), 
+                   rep("6", nrow(sad)), rep("7", nrow(sead)), rep("8", nrow(ead)), 
+                   rep("9", nrow(nad)), rep("10", nrow(tead)))
+
+poldemcom = rbind(zad, oad, tad, trad, fad, fiad, sad, sead, ead, nad, tead)
+poldemcom$original_dataset = poldemcomnames
+poldemcom = poldemcom |>
+  select(original_dataset, everything())
+
+poldemcom = poldemcom |>
+  filter(P18ST_A %in% c(1, 2))
+poldemcom = poldemcom |>
+  group_by(original_dataset) |>
+  summarize(total_support = sum(percentage))
+
+row_to_move = poldemcom[3, ]
+poldemcom = poldemcom[-3, ]
+poldemcom = rbind(poldemcom, row_to_move)
+rownames(poldemcom) = NULL
+
+poldemcom$original_dataset = as.numeric(as.character(poldemcom$original_dataset))
+
+#military
+zmil = filter(df, P16ST == 0)
+zam = count(zmil, P20STM)
+total = nrow(zmil)
+zam = mutate(zam, percentage = n / total * 100)
+
+omil = filter(df, P16ST == 1)
+oam = count(omil, P20STM)
+total = nrow(omil)
+oam = mutate(oam, percentage = n / total * 100)
+
+tmil = filter(df, P16ST == 2)
+tam = count(tmil, P20STM)
+total = nrow(tmil)
+tam = mutate(tam, percentage = n / total * 100)
+
+trmil = filter(df, P16ST == 3)
+tram = count(trmil, P20STM)
+total = nrow(trmil)
+tram = mutate(tram, percentage = n / total * 100)
+
+fmil = filter(df, P16ST == 4)
+fam = count(fmil, P20STM)
+total = nrow(fmil)
+fam = mutate(fam, percentage = n / total * 100)
+
+fimil = filter(df, P16ST == 5)
+fiam = count(fimil, P20STM)
+total = nrow(fimil)
+fiam = mutate(fiam, percentage = n / total * 100)
+
+smil = filter(df, P16ST == 6)
+sam = count(smil, P20STM)
+total = nrow(smil)
+sam = mutate(sam, percentage = n / total * 100)
+
+semil = filter(df, P16ST == 7)
+seam = count(semil, P20STM)
+total = nrow(semil)
+seam = mutate(seam, percentage = n / total * 100)
+
+emil = filter(df, P16ST == 8)
+eam = count(emil, P20STM)
+total = nrow(emil)
+eam = mutate(eam, percentage = n / total * 100)
+
+nmil = filter(df, P16ST == 9)
+nam = count(nmil, P20STM)
+total = nrow(nmil)
+nam = mutate(nam, percentage = n / total * 100)
+
+temil = filter(df, P16ST == 10)
+team = count(temil, P20STM)
+total = nrow(temil)
+team = mutate(team, percentage = n / total * 100)
+
+#combine data
+polmilcomnames = c(rep("0", nrow(zam)), rep("1", nrow(oam)), rep("2", nrow(tam)), 
+                   rep("3", nrow(tram)), rep("4", nrow(fam)), rep("5", nrow(fiam)), 
+                   rep("6", nrow(sam)), rep("7", nrow(seam)), rep("8", nrow(eam)), 
+                   rep("9", nrow(nam)), rep("10", nrow(team)))
+
+polmilcom = rbind(zam, oam, tam, tram, fam, fiam, sam, seam, eam, nam, team)
+polmilcom$original_dataset = polmilcomnames
+polmilcom = polmilcom |>
+  select(original_dataset, everything())
+polmilcom = polmilcom |>
+  filter(P20STM == 1)
+polmilcom$original_dataset = as.numeric(as.character(polmilcom$original_dataset))
+
+#create theme
+Theme = theme_minimal(base_size = 10) +
+  theme(
+    text = element_text(),
+    plot.title = element_text(face = 'bold', hjust = 0.5),
+    plot.background = element_rect(fill = 'white', color = NA),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    axis.line.x = element_line(color = 'lightgray'),
+    axis.text.x = element_text(color = "gray30"),
+    axis.line.y = element_line(color = 'lightgray'),
+    axis.text.y = element_text(color = "gray30"),
+    legend.position = "none",
+    plot.margin = margin(b = 0.5, r = 20),
+    plot.subtitle = element_text(size = 6, hjust = 0.5))
+plot_condemcom = ggplot(condemcom, aes(x = country, y = total_support)) +
+  geom_col(fill = "skyblue", alpha = 0.7, width = 0.5) +  # Column graph for total_count
+  labs(title = "Democracy Preferred",
+       x = "Country",
+       y = "Percentage") +
+  scale_y_continuous(expand = c(0, 0))+
+  Theme 
+##graphs
+#military
+plot_conmilcom <- ggplot(conmilcom, aes(x = country, y = percentage)) +
+  geom_col(fill = "firebrick1", alpha = 0.7, width = 0.5) +  # Column graph for total_count
+  labs(title = "Military Rule Acceptable",
+       x = "Country",
+       y = "Percentage") +
+  scale_y_continuous(expand = c(0, 0))+
+  Theme 
+
+#combine
+plot_condemcom = plot_condemcom + 
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100))
+
+plot_conmilcom = plot_conmilcom + 
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100))
+
+conplot = plot_condemcom + plot_conmilcom + plot_layout(ncol = 2)
+#graph dem poli
+plot_poldemcom = ggplot(poldemcom, aes(x = original_dataset, y = total_support)) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "firebrick1", linetype = "dotted")+
+  geom_col(fill = "skyblue", alpha = 0.7, width = 0.8) +
+  labs(title = NULL,
+       x = "         More Liberal <-> More Conservative",
+       y = "Percentage") +
+    scale_x_continuous(breaks = seq(0, 10, 1))+
+  scale_y_continuous(expand = expansion(mult = c(0, 0)), limits = c(0, 100))+
+ Theme
+
+#graph mil poli
+plot_polmilcom = ggplot(polmilcom, aes(x = original_dataset, y = percentage)) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "skyblue", linetype = "dotted")+
+  geom_col(fill = "firebrick1", alpha = 0.7, width = 0.8) +
+  labs(title = NULL,
+       x = "         More Liberal <-> More Conservative",
+       y = "Percentage") +
+  scale_x_continuous(breaks = seq(0, 10, 1))+
+  scale_y_continuous(expand = expansion(mult = c(0, 0)), limits = c(0, 100))+
+  Theme
+```
+
+
+## Government Preference
+
+- Do the citizens of the countries of the Former Gran Colombia share similar views on governance?
+- Does opinion vary more based on politics?
+
+## Opinions by Country
+
+```{r fig.width=6, fig.height=3}
+#graph comp countries
+plot(conplot)
+```
+
+## Opinions of Democracy by Political Leaning
+
+```{r fig.width=5, fig.height=2.5}
+plot(plot_poldemcom)
+```
+
+## Opinions of Military Rule by Political Leaning
+
+```{r fig.width=5, fig.height=2.5}
+plot(plot_polmilcom)
+```
